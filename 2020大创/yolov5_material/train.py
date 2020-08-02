@@ -8,12 +8,14 @@ import torch.utils.data
 from torch.cuda import amp
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.tensorboard import SummaryWriter
+from utils.utils import increment_dir
 
 import test  # import test.py to get mAP after each epoch
 from models.yolo import Model
 from utils import google_utils
 from utils.datasets import *
 from utils.utils import *
+from utils.utils import torch_distributed_zero_first
 
 # Hyperparameters
 hyp = {'optimizer': 'SGD',  # ['adam', 'SGD', None] if none, default is SGD
@@ -454,7 +456,8 @@ if __name__ == '__main__':
     if not opt.evolve:
         if opt.local_rank in [-1, 0]:
             print('Start Tensorboard with "tensorboard --logdir=runs", view at http://localhost:6006/')
-            tb_writer = SummaryWriter(log_dir=increment_dir('runs/exp', opt.name))
+            # tb_writer = SummaryWriter(log_dir=increment_dir('runs/exp', opt.name))
+            tb_writer = SummaryWriter(log_dir=increment_dir('..\\yolo\\yolov5-master\\runs\\exp', opt.name))
         else:
             tb_writer = None
 
@@ -506,9 +509,6 @@ if __name__ == '__main__':
 
             # Write mutation results
             print_mutation(hyp, results, opt.bucket)
-
-            # my own addition
-            strip_optimizer()
 
             # Plot results
             # plot_evolution_results(hyp)
